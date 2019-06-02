@@ -85,7 +85,7 @@ class ETL:
         data.to_csv(self.output_path_loaded)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     etl = ETL(acc_name="felix.boesing@t-online.de",
               use_cache=False)
     etl.run_etl_pipeline()
