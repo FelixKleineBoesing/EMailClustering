@@ -18,10 +18,9 @@ class ETL:
         :param use_cache whether to use cached exctraced data or not
         '''
         self.caching = use_cache
-        self.messages = []
         self.cleaned_data = None
-        self.output_path_extracted = "computed_data/e_mails_extracted.txt"
-        self.output_path_loaded = "computed_data/e_mails_cleaned.csv"
+        self.output_path_extracted = "../computed_data/e_mails_extracted.txt"
+        self.output_path_loaded = "../computed_data/e_mails_cleaned.csv"
         self.acc_name = acc_name
 
     def run_etl_pipeline(self):
@@ -39,12 +38,12 @@ class ETL:
         outlook_instance = client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 
         folders = outlook_instance.Folders(self.acc_name).folders
-
+        messages = []
         for folder in folders:
             if str(folder) == "Posteingang":
-                messages = folder.Items
+                raw_messages = folder.Items
                 i = 0
-                for message in messages:
+                for message in raw_messages:
                     if i % 50 == 0:
                         print(i)
                     i += 1
@@ -56,10 +55,10 @@ class ETL:
                            "Date": str(message.SentOn),
                            "Category": str(message.Categories),
                            "ReceivedTime": str(message.ReceivedTime)}
-                    self.messages += [msg]
-        if len(self.messages) > 0:
+                    messages += [msg]
+        if len(messages) > 0:
             file = open(self.output_path_extracted, "w")
-            file.write(json.dumps(self.messages))
+            file.write(json.dumps(messages))
             file.close()
 
     def clean_emails(self, data: dict):
@@ -88,6 +87,6 @@ class ETL:
 
 if __name__=="__main__":
     etl = ETL(acc_name="felix.boesing@t-online.de",
-              use_cache =True)
+              use_cache=False)
     etl.run_etl_pipeline()
 
