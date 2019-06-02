@@ -20,26 +20,25 @@ class ETL:
         self.caching = use_cache
         self.messages = []
         self.cleaned_data = None
-        self.output_path_extracted = "../computed_data/e_mails_extracted.txt"
-        self.output_path_loaded = "../computed_data/e_mails_cleaned.csv"
+        self.output_path_extracted = "computed_data/e_mails_extracted.txt"
+        self.output_path_loaded = "computed_data/e_mails_cleaned.csv"
+        self.acc_name = acc_name
 
     def run_etl_pipeline(self):
         data = None
         if not os.path.isfile(self.output_path_extracted) or not self.caching:
-            data = self.extract_mails_from_outlook()
+            self.extract_mails_from_outlook()
         if data is None:
             with open(self.output_path_extracted, "r") as f:
                 data = json.load(f)
         cleaned_data = self.clean_emails(data)
         self.load_emails(cleaned_data)
 
-
-    def extract_mails_from_outlook(self, acc_name: str = None):
+    def extract_mails_from_outlook(self):
         # init outlook conn
         outlook_instance = client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 
-        inbox = outlook_instance.Folders(acc_name)
-        folders = inbox.folders
+        folders = outlook_instance.Folders(self.acc_name).folders
 
         for folder in folders:
             if str(folder) == "Posteingang":
@@ -63,7 +62,6 @@ class ETL:
             file.write(json.dumps(self.messages))
             file.close()
 
-
     def clean_emails(self, data: dict):
         dropped_mails = 0
         for index, mail in enumerate(data):
@@ -86,6 +84,7 @@ class ETL:
     def load_emails(self, data: pd.DataFrame):
         logging.info("Writing cleaned data to file: {0}".format(self.output_path_loaded))
         data.to_csv(self.output_path_loaded)
+
 
 if __name__=="__main__":
     etl = ETL(acc_name="felix.boesing@t-online.de",
