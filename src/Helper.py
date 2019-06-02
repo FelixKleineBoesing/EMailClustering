@@ -13,6 +13,7 @@ ESCAPE_SEQUENCE_RE = re.compile(r'''
     | \\[\\'"abfnrtv]  # Single-character escapes
     )''', re.UNICODE | re.VERBOSE)
 
+
 def get_acc_names():
     '''
     establishes connection to outlook and returns all available account names
@@ -29,11 +30,13 @@ def get_acc_names():
 
     return acc_names
 
+
 def decode_escapes(s):
     def decode_match(match):
         return codecs.decode(match.group(0), 'unicode-escape')
 
     return ESCAPE_SEQUENCE_RE.sub(decode_match, s)
+
 
 if __name__=="__main__":
     print(get_acc_names())

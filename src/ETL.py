@@ -7,6 +7,7 @@ import logging
 
 from src.Helper import decode_escapes
 
+
 class ETL:
 
     def __init__(self, acc_name: str = None,
