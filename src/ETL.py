@@ -7,6 +7,7 @@ import logging
 
 from src.Helper import decode_escapes
 
+
 class ETL:
 
     def __init__(self, acc_name: str = None,
@@ -17,34 +18,32 @@ class ETL:
         :param use_cache whether to use cached exctraced data or not
         '''
         self.caching = use_cache
-        self.messages = []
         self.cleaned_data = None
         self.output_path_extracted = "../computed_data/e_mails_extracted.txt"
         self.output_path_loaded = "../computed_data/e_mails_cleaned.csv"
+        self.acc_name = acc_name
 
     def run_etl_pipeline(self):
         data = None
         if not os.path.isfile(self.output_path_extracted) or not self.caching:
-            data = self.extract_mails_from_outlook()
+            self.extract_mails_from_outlook()
         if data is None:
             with open(self.output_path_extracted, "r") as f:
                 data = json.load(f)
         cleaned_data = self.clean_emails(data)
         self.load_emails(cleaned_data)
 
-
-    def extract_mails_from_outlook(self, acc_name: str = None):
+    def extract_mails_from_outlook(self):
         # init outlook conn
         outlook_instance = client.Dispatch("Outlook.Application").GetNamespace("MAPI")
 
-        inbox = outlook_instance.Folders(acc_name)
-        folders = inbox.folders
-
+        folders = outlook_instance.Folders(self.acc_name).folders
+        messages = []
         for folder in folders:
             if str(folder) == "Posteingang":
-                messages = folder.Items
+                raw_messages = folder.Items
                 i = 0
-                for message in messages:
+                for message in raw_messages:
                     if i % 50 == 0:
                         print(i)
                     i += 1
@@ -56,12 +55,11 @@ class ETL:
                            "Date": str(message.SentOn),
                            "Category": str(message.Categories),
                            "ReceivedTime": str(message.ReceivedTime)}
-                    self.messages += [msg]
-        if len(self.messages) > 0:
+                    messages += [msg]
+        if len(messages) > 0:
             file = open(self.output_path_extracted, "w")
-            file.write(json.dumps(self.messages))
+            file.write(json.dumps(messages))
             file.close()
-
 
     def clean_emails(self, data: dict):
         dropped_mails = 0
@@ -86,8 +84,9 @@ class ETL:
         logging.info("Writing cleaned data to file: {0}".format(self.output_path_loaded))
         data.to_csv(self.output_path_loaded)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     etl = ETL(acc_name="felix.boesing@t-online.de",
-              use_cache =True)
+              use_cache=False)
     etl.run_etl_pipeline()
 

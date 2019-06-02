@@ -1,2 +1,5 @@
-computed_Data
+src/__pycache__/__init__.cpython-37.pyc
+.idea/vcs.xml
 *.idea*
+*.pyc*
+computed_data/

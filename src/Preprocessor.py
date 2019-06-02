@@ -1,6 +1,7 @@
 import abc
 import pandas as pd
 
+
 class Preprocessor(abc.ABC):
 
     @abc.abstractmethod
