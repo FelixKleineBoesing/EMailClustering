@@ -1,5 +1,5 @@
 import unittest
-from src.Pipeline import Pipeline
+from mailcluster.Pipeline import Pipeline
 
 
 class PipelineTester(unittest.TestCase):

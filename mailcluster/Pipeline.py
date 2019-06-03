@@ -1,11 +1,12 @@
-from src.ETL import ETL
-from src.Preprocessor import Preprocessor
-from src.Models import Model
+from mailcluster.ETL import ETL
+from mailcluster.Preprocessor import Preprocessor
+from mailcluster.Models import Model
+from mailcluster.FeatureEngineerer import FeatureEngineerer
 
 
 class Pipeline:
 
-    def __init__(self, etl: ETL, preprocessors: list, model: Model):
+    def __init__(self, etl: ETL, feature_engineerer: FeatureEngineerer, preprocessors: list, model: Model):
         '''
         Pipeline class which unites all steps from etl to modelling
         :param etl:

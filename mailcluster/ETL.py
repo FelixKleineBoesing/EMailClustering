@@ -4,8 +4,9 @@ import os
 import json
 from win32com import client
 import logging
+import datetime
 
-from src.Helper import decode_escapes
+from mailcluster.Helper import decode_escapes
 
 
 class ETL:
@@ -34,32 +35,7 @@ class ETL:
         self.load_emails(cleaned_data)
 
     def extract_mails_from_outlook(self):
-        # init outlook conn
-        outlook_instance = client.Dispatch("Outlook.Application").GetNamespace("MAPI")
-
-        folders = outlook_instance.Folders(self.acc_name).folders
-        messages = []
-        for folder in folders:
-            if str(folder) == "Posteingang":
-                raw_messages = folder.Items
-                i = 0
-                for message in raw_messages:
-                    if i % 50 == 0:
-                        print(i)
-                    i += 1
-                    msg = {"To": str(message.To),
-                           "From": str(message.Sender),
-                           "Body": str(message.Body),
-                           "CC": str(message.CC),
-                           "Subject": str(message.Subject),
-                           "Date": str(message.SentOn),
-                           "Category": str(message.Categories),
-                           "ReceivedTime": str(message.ReceivedTime)}
-                    messages += [msg]
-        if len(messages) > 0:
-            file = open(self.output_path_extracted, "w")
-            file.write(json.dumps(messages))
-            file.close()
+        pass
 
     def clean_emails(self, data: dict):
         dropped_mails = 0
@@ -78,6 +54,29 @@ class ETL:
         # convert cp in the right format
         # engineer some features
         df = pd.DataFrame(data)
+
+        tos, bodies, categories, dates, froms, received_times, subjects, ccs = [], [], [], [], [], [], [], []
+        for i in range(df.shape[0]):
+            tos.append(df.loc[i, "To"].decode("utf-8") if type(df.loc[i, "To"]) == bytes else df.loc[i, "To"])
+            bodies.append(df.loc[i, "Body"].decode("utf-8") if type(df.loc[i, "Body"]) == bytes else df.loc[i, "Body"])
+            categories.append(df.loc[i, "Category"].decode("utf-8") if type(df.loc[i, "Category"]) == bytes
+                            else df.loc[i, "Category"])
+            dates.append(df.loc[i, "Date"].decode("utf-8") if type(df.loc[i, "Date"]) == bytes else df.loc[i, "Date"])
+            froms.append(df.loc[i, "From"].decode("utf-8") if type(df.loc[i, "From"]) == bytes else df.loc[i, "From"])
+            received_times.append(df.loc[i, "ReceivedTime"].decode("utf-8") if type(df.loc[i, "ReceivedTime"]) == bytes
+                                  else df.loc[i, "ReceivedTime"])
+            subjects.append(df.loc[i, "Subject"].decode("utf-8") if type(df.loc[i, "Subject"]) == bytes
+                           else df.loc[i, "Subject"])
+            ccs.append(df.loc[i, "CC"].decode("utf-8") if type(df.loc[i, "CC"]) == bytes else df.loc[i, "CC"])
+
+        df.To = tos
+        df.Body = bodies
+        df.Category = categories
+        df.Date = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in dates]
+        df.From = froms
+        df.ReceivedTime = received_times
+        df.Subject = subjects
+        df.CC = ccs
         return df
 
     def load_emails(self, data: pd.DataFrame):

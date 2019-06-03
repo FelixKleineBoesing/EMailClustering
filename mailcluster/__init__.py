@@ -1,4 +1,4 @@
-from src.ETL import ETL
+from mailcluster.ETL import ETL
 
 
 if __name__=="__main__":
