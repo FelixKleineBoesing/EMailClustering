@@ -74,7 +74,7 @@ class ETL:
         df.Category = categories
         df.Date = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in dates]
         df.From = froms
-        df.ReceivedTime = received_times
+        df.ReceivedTime = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in received_times]
         df.Subject = subjects
         df.CC = ccs
         return df
