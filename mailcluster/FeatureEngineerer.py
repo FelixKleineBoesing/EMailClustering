@@ -13,6 +13,11 @@ class FeatureEngineerer:
         self._get_length_from(data)
         self._get_number_alias(data)
         self._get_number_urls(data)
+        self._get_number_words(data) 
+        
+    def _get_number_words(data):
+        words = data.Body.str.split(" ")
+        # TODO throw out links and special vharacters
 
     def _get_number_images(self, data):
         image_counts = data.Body.str.count(".png")
