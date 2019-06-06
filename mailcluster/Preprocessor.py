@@ -11,16 +11,26 @@ class Preprocessor(abc.ABC):
         '''
         pass
 
-    def preprocess(self, raw_data: pd.DataFrame):
+    def preprocess(self, body: list):
         '''
         in case there must be applied general preprocessing for all preprocessors
         :param raw_data: cleaned data as dataframe
         :return:
         '''
-        assert type(raw_data) == pd.DataFrame
-        preprocessed_data = self._preprocess_core()
+        assert isinstance(body, list)
+        preprocessed_data = self._preprocess_core(body)
         return preprocessed_data
 
     @abc.abstractmethod
-    def _preprocess_core(self):
+    def _preprocess_core(self, data: list):
         pass
+
+
+class Cleaner(Preprocessor):
+    
+    def __init__(self):
+        super().__init__()
+
+    def _preprocess_core(self, data: list):
+        body = [mail.split(" ") for mail in data]
+        return body
