@@ -15,7 +15,7 @@ class FeatureEngineerer:
         self._get_number_urls(data)
         self._get_number_words(data) 
         
-    def _get_number_words(data):
+    def _get_number_words(self, data):
         words = data.Body.str.split(" ")
         # TODO throw out links and special vharacters
 

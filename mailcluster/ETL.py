@@ -51,33 +51,19 @@ class ETL:
 
         logging.warning("{0} mails were dropped because of unconvertible encoding!".format(dropped_mails))
 
-        # convert cp in the right format
-        # engineer some features
-        df = pd.DataFrame(data)
+        data["To"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["To"]]
+        data["Body"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["Body"]]
+        data["Category"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["Category"]]
+        data["Date"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["Date"]]
+        data["Froom"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["From"]]
+        data["ReceivedTime"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["ReceivedTime"]]
+        data["subject"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["Subject"]]
+        data["CC"] = [item.decode("utf-8") if type(item) == bytes else item for item in data["CC"]]
 
-        tos, bodies, categories, dates, froms, received_times, subjects, ccs = [], [], [], [], [], [], [], []
-        for i in range(df.shape[0]):
-            tos.append(df.loc[i, "To"].decode("utf-8") if type(df.loc[i, "To"]) == bytes else df.loc[i, "To"])
-            bodies.append(df.loc[i, "Body"].decode("utf-8") if type(df.loc[i, "Body"]) == bytes else df.loc[i, "Body"])
-            categories.append(df.loc[i, "Category"].decode("utf-8") if type(df.loc[i, "Category"]) == bytes
-                            else df.loc[i, "Category"])
-            dates.append(df.loc[i, "Date"].decode("utf-8") if type(df.loc[i, "Date"]) == bytes else df.loc[i, "Date"])
-            froms.append(df.loc[i, "From"].decode("utf-8") if type(df.loc[i, "From"]) == bytes else df.loc[i, "From"])
-            received_times.append(df.loc[i, "ReceivedTime"].decode("utf-8") if type(df.loc[i, "ReceivedTime"]) == bytes
-                                  else df.loc[i, "ReceivedTime"])
-            subjects.append(df.loc[i, "Subject"].decode("utf-8") if type(df.loc[i, "Subject"]) == bytes
-                           else df.loc[i, "Subject"])
-            ccs.append(df.loc[i, "CC"].decode("utf-8") if type(df.loc[i, "CC"]) == bytes else df.loc[i, "CC"])
-
-        df.To = tos
-        df.Body = bodies
-        df.Category = categories
-        df.Date = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in dates]
-        df.From = froms
-        df.ReceivedTime = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in received_times]
-        df.Subject = subjects
-        df.CC = ccs
-        return df
+        data["Date"] = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in data["Date"]]
+        data["ReceivedTime"] = [datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S+00:00") for date in
+                                data["ReceivedTime"]]
+        return data
 
     def load_emails(self, data: pd.DataFrame):
         logging.info("Writing cleaned data to file: {0}".format(self.output_path_loaded))
