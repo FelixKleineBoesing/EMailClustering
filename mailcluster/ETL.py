@@ -1,5 +1,3 @@
-import pandas as pd
-import numpy as np
 import os
 import json
 from win32com import client
@@ -65,9 +63,9 @@ class ETL:
                                 data["ReceivedTime"]]
         return data
 
-    def load_emails(self, data: pd.DataFrame):
+    def load_emails(self, data: dict):
         logging.info("Writing cleaned data to file: {0}".format(self.output_path_loaded))
-        data.to_csv(self.output_path_loaded)
+        json.dump(data, self.output_path_loaded)
 
 
 if __name__ == "__main__":
