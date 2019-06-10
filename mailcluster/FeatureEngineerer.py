@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from functools import reduce
 
 
 class FeatureEngineerer:
@@ -16,35 +17,31 @@ class FeatureEngineerer:
         self._get_number_words(data) 
         
     def _get_number_words(self, data: dict):
-        words = data.Body.str.split(" ")
-        # TODO throw out links and special vharacters
+        return [len(body.split(" ")) for body in data["Body"]]
 
     def _get_number_images(self, data: dict):
-        image_counts = data["Body"].str.count(".png")
-        image_counts + data["Body"].str.count(".jpeg")
-        image_counts + data["Body"].str.count(".gif")
+        image_counts = [body.count(".png") + body.count(".jpeg") + body.count(".gif") for body in data["Body"]]
         self.engineered_features["ImageCounts"] = image_counts
 
     def _get_number_urls(self, data: dict):
-        url_counts = data["Body"].str.count("http://")
-        url_counts + data["Body"].str.count("https://")
+        url_counts = [body.count("http://") + body.count("https://") for body in data["Body"]]
         self.engineered_features["URLCounts"] = url_counts
 
     def _get_number_alias(self, data: dict):
-        paragraphs_counts = data["Body"].str.count(r"\\n")
-        tab_counts = data["Body"].str.count(r"\\t")
-        idk_counts = data["Body"].str.count(r"\\")
+        paragraphs_counts = [body.count(r"\\n") for body in data["Body"]]
+        tab_counts = [body.count(r"\\t") for body in data["Body"]]
+        idk_counts = [body.count(r"\\r") for body in data["Body"]]
         self.engineered_features["ParaCounts"] = paragraphs_counts
         self.engineered_features["TabCounts"] = tab_counts
         self.engineered_features["IDKCounts"] = idk_counts
 
     def _get_length_body(self, data: dict):
-        length_body = data["Body"].str.len()
+        length_body = [len(body) for body in data["Body"]]
         self.engineered_features["LengthBody"] = length_body
 
     def _get_length_from(self, data: dict):
-        length_body = data["From"].str.len()
-        self.engineered_features["LengthFrom"] = length_body
+        length_from = [len(body) for body in data["From"]]
+        self.engineered_features["LengthFrom"] = length_from
 
 
 if __name__ == "__main__":
